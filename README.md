@@ -1,6 +1,6 @@
-# 🏺 BrassCart - Premium Moradabad Brass E-Commerce Platform
+# PeetalRaj -Moradabad Brass E-Commerce Platform
 
-A professional, full-featured e-commerce web application for selling authentic Moradabad Brass (Peetal) products. Built with Flask and featuring a modern, responsive design with integrated payment processing via Razorpay.
+A e-commerce web application for selling authentic Moradabad Brass (Peetal) products. Built with Flask and featuring a modern, responsive design with integrated payment processing via Razorpay.
 
 ## ✨ Features
 
@@ -100,40 +100,6 @@ rm instance/brasscart.db
 python seed.py
 ```
 
-## 🧪 Testing the Payment Gateway
-
-Use the following test card details in Razorpay:
-- **Card Number**: 4111 1111 1111 1111
-- **Expiry**: Any future date (MM/YY format)
-- **CVV**: Any 3 digits
-
-## 📂 Project Structure
-
-```
-BrassCart/
-├── app/
-│   ├── __init__.py                 # Flask app initialization
-│   ├── models.py                   # Database models (User, Product, Order)
-│   ├── routes.py                   # Main routes and payment handling
-│   ├── auth_routes.py              # Authentication routes
-│   ├── admin_routes.py             # Admin dashboard routes
-│   ├── forms.py                    # WTForms validation
-│   ├── static/
-│   │   ├── css/styles.css          # Custom styling
-│   │   └── uploads/                # Product images
-│   └── templates/
-│       ├── base.html               # Base template
-│       ├── home.html               # Home page
-│       ├── products.html           # Products listing
-│       ├── checkout.html           # Checkout with Razorpay
-│       ├── cart.html               # Shopping cart
-│       └── admin/                  # Admin templates
-├── run.py                          # Application entry point
-├── seed.py                         # Database seeding script
-├── requirements.txt                # Python dependencies
-├── .env.example                    # Environment variables template
-└── README.md                       # This file
-```
 
 ## 🔑 API Keys & Security
 
@@ -144,40 +110,6 @@ BrassCart/
 3. Copy your Key ID and Key Secret
 4. Add them to your `.env` file
 
-### Security Best Practices
-
-- ✅ **Never commit `.env`** - Use `.env.example` as template
-- ✅ **Keep secret keys private** - Rotate keys periodically
-- ✅ **Use environment variables** - For all sensitive data
-- ✅ **HTTPS in production** - Always use HTTPS for payments
-- ✅ **Secure headers** - Implement CSRF protection (already included)
-
-## 🚢 Deployment
-
-### Local Production Build
-```bash
-# Install gunicorn
-pip install gunicorn
-
-# Run with Gunicorn (production WSGI server)
-gunicorn -w 4 -b 0.0.0.0:5000 run:app
-```
-
-### Deploy on Cloud Platforms
-
-**Heroku**:
-```bash
-heroku create your-app-name
-git push heroku main
-heroku config:set RAZORPAY_KEY_ID=your_key_id
-heroku config:set RAZORPAY_KEY_SECRET=your_secret
-```
-
-**PythonAnywhere**:
-- Upload project files
-- Configure virtual environment
-- Set environment variables in Web app settings
-- Reload web app
 
 ## 📱 Default Admin Login
 
@@ -187,44 +119,8 @@ Default admin credentials (from seed.py):
 
 ⚠️ **Change these credentials in production!**
 
-## 🐛 Troubleshooting
 
-### "ImportError: No module named 'flask'"
-```bash
-pip install -r requirements.txt
-```
 
-### "ModuleNotFoundError: No module named 'dotenv'"
-```bash
-pip install python-dotenv
-```
 
-### Database errors
-```bash
-# Reset database
-rm instance/brasscart.db
-python seed.py
-```
-
-### Razorpay payment errors
-- Verify Key ID and Key Secret in `.env`
-- Check test mode is enabled in Razorpay dashboard
-- Ensure SSL certificate for HTTPS (required for production)
-
-## 📧 Contact & Support
-
-For issues or questions, please create an issue in the repository.
-
-## 📄 License
-
-This project is open source and available under the MIT License.
-
-## 🙏 Credits
-
-- Razorpay for payment processing
-- Bootstrap for UI framework
-- Flask community for excellent documentation
-
----
-
-**Made with ❤️ for selling beautiful Moradabad brass products**
+**Made with ❤️to support elderly artisans by digitally preserving traditional crafts at risk of
+extinction.**
