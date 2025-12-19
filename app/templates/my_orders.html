@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}My Orders - BrassCart{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white">My Orders</h1>
+    </div>
+</div>
+
+<div class="container my-5">
+    {% if orders %}
+    <div class="row">
+        {% for order in orders %}
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <h6 class="text-muted mb-1">Order #{{ order.id }}</h6>
+                            <p class="small text-muted mb-0">{{ order.created_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="mb-0"><strong>{{ order.order_items|length }} item(s)</strong></p>
+                        </div>
+                        <div class="col-md-3">
+                            <p class="mb-0 text-gold fw-bold">₹{{ "%.2f"|format(order.total_price) }}</p>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <span class="badge bg-success">{{ order.status }}</span>
+                            <a href="{{ url_for('main.order_success', order_id=order.id) }}" 
+                               class="btn btn-sm btn-outline-brass ms-2">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        {% for item in order.order_items %}
+                        <div class="col-md-6 mb-2">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ url_for('static', filename='uploads/' + item.product.image_filename) }}" 
+                                     class="rounded me-3" width="60" alt="{{ item.product.name }}"
+                                     onerror="this.src='https://via.placeholder.com/60x60/D4AF37/FFFFFF?text=P'">
+                                <div>
+                                    <p class="mb-0">{{ item.product.name }}</p>
+                                    <small class="text-muted">Qty: {{ item.quantity }} × ₹{{ "%.2f"|format(item.price) }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-bag-x fs-1 text-muted"></i>
+        <h3 class="mt-3 text-muted">No orders yet</h3>
+        <p class="text-muted">Start shopping to see your orders here!</p>
+        <a href="{{ url_for('main.products') }}" class="btn btn-brass btn-lg mt-3">
+            <i class="bi bi-shop"></i> Browse Products
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white">Order #{{ order.id }}</h1>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="mb-4">
+        <a href="{{ url_for('admin.orders') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-brass text-white">
+                    <h5 class="mb-0">Order Items</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in order.order_items %}
+                    <div class="row align-items-center {% if not loop.last %}border-bottom pb-3 mb-3{% endif %}">
+                        <div class="col-md-2">
+                            <img src="{{ url_for('static', filename='uploads/' + item.product.image_filename) }}" 
+                                 class="img-fluid rounded" alt="{{ item.product.name }}"
+                                 onerror="this.src='https://via.placeholder.com/100x100/D4AF37/FFFFFF?text=P'">
+                        </div>
+                        <div class="col-md-5">
+                            <h6 class="mb-1">{{ item.product.name }}</h6>
+                            <p class="text-muted small mb-0">{{ item.product.category }}</p>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <p class="mb-0">Qty: {{ item.quantity }}</p>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <p class="mb-0 text-muted">₹{{ "%.2f"|format(item.price) }} each</p>
+                            <p class="mb-0 fw-bold">₹{{ "%.2f"|format(item.price * item.quantity) }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-brass text-white">
+                    <h5 class="mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Order ID:</span>
+                        <strong>#{{ order.id }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Date:</span>
+                        <span>{{ order.created_at.strftime('%b %d, %Y %I:%M %p') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Status:</span>
+                        <span class="badge bg-success">{{ order.status }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Total Amount:</strong>
+                        <strong class="text-gold fs-5">₹{{ "%.2f"|format(order.total_price) }}</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-brass text-white">
+                    <h5 class="mb-0">Customer Details</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2"><strong>Name:</strong> {{ order.user.username }}</p>
+                    <p class="mb-2"><strong>Email:</strong> {{ order.user.email }}</p>
+                    <p class="mb-0"><strong>User ID:</strong> #{{ order.user.id }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

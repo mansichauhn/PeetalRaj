@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout - BrassCart{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="text-white">Checkout</h1>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Order Summary</h5>
+                    {% for product_id, item in cart_items.items() %}
+                    <div class="d-flex justify-content-between align-items-center {% if not loop.last %}border-bottom pb-2 mb-2{% endif %}">
+                        <div>
+                            <strong>{{ item.name }}</strong>
+                            <span class="text-muted"> x{{ item.quantity }}</span>
+                        </div>
+                        <div>₹{{ "%.2f"|format(item.price * item.quantity) }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Shipping Information</h5>
+                    <form id="checkoutForm">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" value="{{ current_user.username }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" value="{{ current_user.email }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="+91 1234567890" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Shipping Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="3" placeholder="Street address, City, State, Pincode" required></textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Secure payment processing with Razorpay. Test Card: 4111 1111 1111 1111 | Any Future Date | Any CVV
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="button" id="payButton" class="btn btn-brass btn-lg">
+                                <i class="bi bi-lock"></i> Pay ₹{{ "%.2f"|format(total) }}
+                            </button>
+                            <a href="{{ url_for('main.cart') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Cart
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Payment Summary</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>₹{{ "%.2f"|format(total) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <span class="text-success">Free</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax:</span>
+                        <span>Included</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong class="fs-5">Total:</strong>
+                        <strong class="text-gold fs-4">₹{{ "%.2f"|format(total) }}</strong>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <p class="small text-muted">
+                            <i class="bi bi-shield-check text-success"></i> Secure payment processing
+                        </p>
+                        <p class="small text-muted">
+                            <i class="bi bi-truck text-success"></i> Free shipping on all orders
+                        </p>
+                        <p class="small text-muted">
+                            <i class="bi bi-credit-card text-success"></i> Powered by Razorpay
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Razorpay Script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.getElementById('payButton').addEventListener('click', function() {
+    const phone = document.getElementById('phone').value;
+    const address = document.getElementById('address').value;
+    
+    if (!phone || !address) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    // Create FormData to send to backend
+    const formData = new FormData();
+    formData.append('phone', phone);
+    formData.append('address', address);
+    
+    // Send request to process-payment endpoint
+    fetch('{{ url_for("main.process_payment") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Open Razorpay checkout
+            const options = {
+                key: data.razorpay_key_id,
+                amount: data.amount,
+                currency: 'INR',
+                name: 'BrassCart',
+                description: 'Order Payment',
+                order_id: data.razorpay_order_id,
+                prefill: {
+                    name: data.name,
+                    email: data.email,
+                    contact: data.contact
+                },
+                handler: function(response) {
+                    // Verify payment on backend
+                    verifyPayment(
+                        data.razorpay_order_id,
+                        response.razorpay_payment_id,
+                        response.razorpay_signature,
+                        data.order_id
+                    );
+                },
+                theme: {
+                    color: '#8b7355'
+                }
+            };
+            
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+});
+
+function verifyPayment(orderId, paymentId, signature, ordersId) {
+    fetch('{{ url_for("main.verify_payment") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            razorpay_order_id: orderId,
+            razorpay_payment_id: paymentId,
+            razorpay_signature: signature
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '{{ url_for("main.home") }}order-success/' + data.order_id;
+        } else {
+            alert('Payment verification failed: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during verification.');
+    });
+}
+</script>
+{% endblock %}
